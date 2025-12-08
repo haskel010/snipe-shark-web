@@ -2,10 +2,11 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { Table } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { X, ExternalLink } from "lucide-react"
+import { X, ExternalLink, RefreshCw } from "lucide-react"
 
 import {
     Select,
@@ -22,8 +23,19 @@ interface DataTableToolbarProps<TData> {
 export function DataTableToolbar<TData>({
     table,
 }: DataTableToolbarProps<TData>) {
+    const router = useRouter()
+    const [isRefreshing, setIsRefreshing] = React.useState(false)
     const isFiltered = table.getState().columnFilters.length > 0
     const selectedRows = table.getFilteredSelectedRowModel().rows
+
+    const handleRefresh = async () => {
+        setIsRefreshing(true)
+        router.refresh()
+        // Give a small delay for better UX feedback
+        setTimeout(() => {
+            setIsRefreshing(false)
+        }, 500)
+    }
 
     const exportToCsv = () => {
         const rowsToExport = selectedRows.map(row => row.original)
@@ -133,6 +145,16 @@ export function DataTableToolbar<TData>({
                 )}
             </div>
             <div className="flex items-center space-x-2">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8"
+                    onClick={handleRefresh}
+                    disabled={isRefreshing}
+                >
+                    <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    Refresh
+                </Button>
                 <Button
                     variant="outline"
                     size="sm"
