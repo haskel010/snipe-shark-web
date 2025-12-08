@@ -1,6 +1,7 @@
 
 "use client"
 
+import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
@@ -13,6 +14,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { PaymentCard } from "@/components/dashboard/payment-card"
 import { BillTemplate } from "@/components/dashboard/bill-template"
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { updateAdminStatus } from "@/app/dashboard/actions"
 
 export const columns: ColumnDef<Order>[] = [
     {
@@ -154,6 +158,52 @@ export const columns: ColumnDef<Order>[] = [
             const amount = row.getValue(id) as number | null
             if (amount === null) return false
             return amount.toString().includes(value)
+        },
+    },
+    {
+        accessorKey: "admin_status",
+        header: "Admin Status",
+        cell: ({ row }) => {
+            const order = row.original
+            const status = order.admin_status || "none"
+            const [isLoading, setIsLoading] = React.useState(false)
+
+            return (
+                <div className="relative">
+                    {isLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center z-10 bg-background/50 rounded">
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        </div>
+                    )}
+                    <Select
+                        defaultValue={status}
+                        disabled={isLoading}
+                        onValueChange={async (value) => {
+                            setIsLoading(true)
+                            const loadingToast = toast.loading("Updating status...")
+                            try {
+                                await updateAdminStatus(order.id, value)
+                                toast.success("Status updated successfully", { id: loadingToast })
+                            } catch (error) {
+                                toast.error("Failed to update status", { id: loadingToast })
+                            } finally {
+                                setIsLoading(false)
+                            }
+                        }}
+                    >
+                        <SelectTrigger className={`w-[130px] h-8 ${isLoading ? 'opacity-50' : ''}`}>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="none">None</SelectItem>
+                            <SelectItem value="used">Used</SelectItem>
+                            <SelectItem value="rejected">Rejected</SelectItem>
+                            <SelectItem value="spam">Spam</SelectItem>
+                            <SelectItem value="wrong_details">Wrong Details</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            )
         },
     },
     {

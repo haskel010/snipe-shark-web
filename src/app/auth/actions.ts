@@ -1,45 +1,20 @@
 
 'use server'
 
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-
 import { createClient } from '@/utils/supabase/server'
+import { revalidatePath } from 'next/cache'
 
-export async function login(formData: FormData) {
+export async function updateAdminStatus(orderId: number, status: string) {
     const supabase = await createClient()
 
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
-
-    const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-    })
+    const { error } = await supabase
+        .from('orders')
+        .update({ admin_status: status })
+        .eq('id', orderId)
 
     if (error) {
-        return { error: error.message }
+        throw new Error(error.message)
     }
 
-    revalidatePath('/', 'layout')
-    redirect('/dashboard')
-}
-
-export async function signup(formData: FormData) {
-    const supabase = await createClient()
-
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
-
-    const { error } = await supabase.auth.signUp({
-        email,
-        password,
-    })
-
-    if (error) {
-        return { error: error.message }
-    }
-
-    revalidatePath('/', 'layout')
-    redirect('/dashboard') // Or to a confirmation page
+    revalidatePath('/dashboard')
 }

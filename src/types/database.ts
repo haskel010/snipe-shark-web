@@ -9,6 +9,7 @@ export interface Order {
     phone: string | null
     name: string | null
     email: string | null
+    admin_status: string | null
     job_queue?: JobQueue | null
 }
 
