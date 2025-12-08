@@ -8,8 +8,19 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 
+import { toast } from "sonner"
+
 export function AuthForm() {
     const [isLogin, setIsLogin] = useState(true)
+
+    const handleSubmit = async (formData: FormData) => {
+        const action = isLogin ? login : signup
+        const result = await action(formData)
+
+        if (result?.error) {
+            toast.error(result.error)
+        }
+    }
 
     return (
         <Card className="w-[350px]">
@@ -42,16 +53,7 @@ export function AuthForm() {
             <CardFooter className="flex flex-col gap-4">
                 <Button
                     className="w-full"
-                    formAction={isLogin ? login : signup}
-                    // We need to pass the form data. 
-                    // Since we are using formAction on a button inside a form, it automatically submits the form.
-                    // However, we are in a client component, and passing Server Actions directly to formAction works in Next.js.
-                    // But to toggle between login/signup, we might need separate buttons or handle it differently.
-                    // Wait, if I put `form="auth-form"` it might work, but the simpler way is to wrap inputs in <form> and have the button inside.
-                    // Actually, let's just make the button type="submit" and handle the action on the form tag? 
-                    // No, we want two different actions.
-                    // The `formAction` attribute on a submit button overrides the form's action.
-                    // So this should work.
+                    formAction={handleSubmit}
                     type="submit"
                     form="auth-form"
                 >
