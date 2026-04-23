@@ -151,8 +151,17 @@ export const columns: ColumnDef<Order>[] = [
             )
         },
         cell: ({ row }) => {
-            const amount = parseFloat(row.getValue("amount"))
-            return <div className="text-right font-medium">{!isNaN(amount) ? `$${amount.toFixed(2)}` : '-'}</div>
+           const amount = parseFloat(row.getValue("amount"));
+const secondary = parseFloat(order?.data?.amount || 0);
+            return (
+  <div className="text-right font-medium">
+    {!isNaN(amount)
+      ? `$${amount.toFixed(2)}`
+      : !isNaN(secondary)
+        ? `$${secondary.toFixed(2)}`
+        : "-"}
+  </div>
+);
         },
         filterFn: (row, id, value) => {
             const amount = row.getValue(id) as number | null
