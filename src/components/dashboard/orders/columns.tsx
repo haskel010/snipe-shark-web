@@ -154,7 +154,7 @@ export const columns: ColumnDef<Order>[] = [
   const order = row.original;
 
   const amount = parseFloat(row.getValue("amount"));
-  const secondary = parseFloat(order?.data?.amount);
+ const secondary = parseFloat(order?.data?.amount ?? "");
 
   let display = "-";
 
